@@ -20,8 +20,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('login.auth.register');
+        $roles = \App\Models\Role::all(); // Obtener todos los roles
+        return view('login.auth.register', compact('roles'));
     }
+
 
     /**
      * Handle an incoming registration request.
@@ -30,13 +32,16 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validar los datos
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],  // Validación de la imagen
-            'description' => ['nullable', 'string', 'max:500'],  // Validación de la descripción
-            'age' => ['nullable', 'integer', 'min:1'],  // Validación de la edad
+            'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Validación de la imagen
+            'description' => ['nullable', 'string', 'max:500'], // Validación de la descripción
+            'age' => ['nullable', 'integer', 'min:1'],
+            'phone_number' => ['nullable', 'string', 'max:20'],
+            'role_id' => ['required', 'exists:roles,id'], // Validar que el rol exista en la tabla roles
         ]);
 
         // Manejo del archivo de imagen (si se sube)
@@ -45,20 +50,28 @@ class RegisteredUserController extends Controller
             $profileImagePath = $request->file('profile_image')->store('profile_images', 'public');
         }
 
+        // Crear el usuario y asignar el rol
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'profile_image' => $profileImagePath,  // Guardar la ruta de la imagen
-            'description' => $request->description,  // Guardar la descripción
-            'age' => $request->age,  // Guardar la edad
+            'profile_image' => $profileImagePath,
+            'description' => $request->description,
+            'age' => $request->age,
+            'phone_number' => $request->phone_number,
+            'role_id' => $request->role_id, // Asignar el rol al usuario
         ]);
 
         event(new Registered($user));
 
+        // Autenticar al usuario
         Auth::login($user);
 
+        // Redirigir a la página de inicio o dashboard
         return redirect(RouteServiceProvider::HOME);
     }
+
+
+
 
 }

@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('profile_image')->nullable(); // Campo para el archivo de imagen
             $table->text('description')->nullable(); // Campo para la descripción
             $table->integer('age')->nullable(); // Campo para la edad
+            $table->string('phone_number')->nullable(); // Campo para el número de teléfono
+            $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null'); // Campo para la relación con roles
             $table->rememberToken();
             $table->timestamps();
         });
