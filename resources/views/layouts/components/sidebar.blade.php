@@ -31,6 +31,15 @@
                         </li>
                     </ul>
                 </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon far fa-user"></i>
+                        <p>
+                            Crear paciente
+                        </p>
+                    </a>
+                </li>
                 <!-- More sidebar items -->
             </ul>
         </nav>
