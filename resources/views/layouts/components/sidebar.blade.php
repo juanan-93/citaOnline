@@ -14,7 +14,7 @@
         </div>
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
@@ -30,14 +30,18 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{route('admin.index')}}" class="nav-link">
                         <i class="nav-icon far fa-user"></i>
-                        <p>
-                            Crear paciente
-                        </p>
+                        <p>Crear Usuario admin</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon far fa-users"></i>
+                        <p>Crear paciente</p>
                     </a>
                 </li>
                 <!-- More sidebar items -->
