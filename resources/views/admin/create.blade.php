@@ -3,7 +3,7 @@
 @section('title', 'Crear Usuario')
 @section('breadcrumb')
     <ol class="breadcrumb float-sm-right">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{route('admin.index')}}">Home</a></li>
         <li class="breadcrumb-item active">Crear usuario de gestion</li>
     </ol>
 @endsection
@@ -21,6 +21,11 @@
                         <div class="form-group">
                             <label for="name">Nombre</label>
                             <input type="text" class="form-control" id="name" placeholder="Nombre completo" required>
+                        </div>
+                        <!-- Apellidos -->
+                        <div class="form-group">
+                            <label for="name">Apellidos</label>
+                            <input type="text" class="form-control" id="surname" placeholder="Apellidos" required>
                         </div>
 
                         <!-- Teléfono -->
