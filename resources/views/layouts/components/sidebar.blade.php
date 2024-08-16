@@ -6,10 +6,12 @@
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ asset('adminlte/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{ asset('storage/' . auth()->user()->profile_image) }}" class="img-circle elevation-2" alt="User Image">
+
+
             </div>
             <div class="info">
-                <a href="#" class="d-block">Alexander Pierce</a>
+                <a href="#" class="d-block">{{ auth()->user()->name }}</a>
             </div>
         </div>
         <nav class="mt-2">
@@ -40,7 +42,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon far fa-users"></i>
+                        <i class="nav-icon fas fa-users"></i>
                         <p>Crear paciente</p>
                     </a>
                 </li>

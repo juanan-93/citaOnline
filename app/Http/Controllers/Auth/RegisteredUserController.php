@@ -35,6 +35,7 @@ class RegisteredUserController extends Controller
         // Validar los datos
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'surnames' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Validación de la imagen
@@ -53,6 +54,7 @@ class RegisteredUserController extends Controller
         // Crear el usuario y asignar el rol
         $user = User::create([
             'name' => $request->name,
+            'surnames' => $request->surnames,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'profile_image' => $profileImagePath,
