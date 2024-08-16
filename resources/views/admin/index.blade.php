@@ -35,10 +35,10 @@
                                         <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i> Editar
                                         </a>
-                                        <form action="{{ route('admin.destroy', $admin->id) }}" method="POST" style="display:inline;">
+                                        <form action="{{ route('admin.destroy', $admin->id) }}" method="POST" style="display:inline;" class="form-eliminar">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="submit" class="btn btn-danger btn-sm btn-eliminar">
                                                 <i class="fas fa-trash-alt"></i> Eliminar
                                             </button>
                                         </form>
@@ -54,6 +54,7 @@
 @endsection
 
 @push('scripts')
+    {{-- DataTables --}}
     <script>
         $(document).ready(function() {
             $('#admin-table').DataTable({
@@ -61,6 +62,28 @@
                 "lengthChange": false,
                 "autoWidth": false
             });
+        });
+    </script>
+    {{-- SweetAlert2 --}}
+    <script>
+        $(document).on('click', '.btn-eliminar', function(event) {
+            event.preventDefault();
+            var form = $(this).closest("form");
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminarlo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
         });
     </script>
 @endpush
