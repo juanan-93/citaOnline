@@ -3,7 +3,7 @@
 @section('title', 'Crear Usuario')
 @section('breadcrumb')
     <ol class="breadcrumb float-sm-right">
-        <li class="breadcrumb-item"><a href="{{route('admin.index')}}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{route('admin.index')}}">Indice</a></li>
         <li class="breadcrumb-item active">Crear usuario de gestion</li>
     </ol>
 @endsection

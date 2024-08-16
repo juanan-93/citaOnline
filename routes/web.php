@@ -28,10 +28,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ADMIN
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/crear-admin', [AdminController::class, 'create'])->name('admin.create');
 });
+
 
 
 

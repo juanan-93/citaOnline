@@ -33,19 +33,23 @@
                         </li>
                     </ul>
                 </li> --}}
-
-                <li class="nav-item">
-                    <a href="{{route('admin.index')}}" class="nav-link">
-                        <i class="nav-icon far fa-user"></i>
-                        <p>Crear Usuario admin</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>Crear paciente</p>
-                    </a>
-                </li>
+                @can('admin')
+                    {{-- admin --}}
+                    <li class="nav-item">
+                        <a href="{{route('admin.index')}}" class="nav-link">
+                            <i class="nav-icon far fa-user"></i>
+                            <p>Crear Usuario admin</p>
+                        </a>
+                    </li>
+                    {{-- customer --}}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Crear paciente</p>
+                        </a>
+                    </li>
+                @endcan
+                
                 <!-- More sidebar items -->
             </ul>
         </nav>
