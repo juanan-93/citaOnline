@@ -13,7 +13,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header ">
-                    <a href="#" class="btn btn-primary btn-sm">
+                    <a href="{{route('customer.create')}}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> Crear Cliente
                     </a>
                 </div>

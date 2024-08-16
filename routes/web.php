@@ -41,6 +41,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // CUSTOMER
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/crear-customer', [CustomerController::class, 'create'])->name('customer.create');
     
     
 });
