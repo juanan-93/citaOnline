@@ -64,6 +64,40 @@ class AppointmentController extends Controller
         return response()->json(['success' => 'Cita eliminada correctamente.']);
     }
 
+    public function update(Request $request, $id)
+    {
+        try {
+            // Validar los datos
+            $request->validate([
+                'start' => 'required|date',  // Validar como fecha
+                'end' => 'nullable|date',    // Validar como fecha opcional
+            ]);
+
+            // Buscar la cita por ID
+            $appointment = Appointment::findOrFail($id);
+
+            // Verificar que la cita pertenece al usuario autenticado
+            if ($appointment->user_id !== Auth::id()) {
+                return response()->json(['error' => 'No tienes permiso para actualizar esta cita.'], 403);
+            }
+
+            // Convertir las fechas a un formato compatible con MySQL
+            $appointment->start = \Carbon\Carbon::parse($request->start)->format('Y-m-d H:i:s');
+            $appointment->end = $request->end ? \Carbon\Carbon::parse($request->end)->format('Y-m-d H:i:s') : null;
+
+            // Guardar los cambios en la cita
+            $appointment->save();
+
+            // Devolver una respuesta de éxito
+            return response()->json(['success' => 'Cita actualizada correctamente.']);
+
+        } catch (\Exception $e) {
+            // Captura el error y lo envía al cliente como JSON
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+
 
 
 

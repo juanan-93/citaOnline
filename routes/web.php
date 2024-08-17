@@ -55,6 +55,8 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+    Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
+
 });
 
 
