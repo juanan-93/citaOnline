@@ -26,37 +26,36 @@
                                 <th>Apellidos</th>
                                 <th>Edad</th>
                                 <th>Teléfono</th>
-                                <th>Descripción</th>
+                                {{-- <th>Descripción</th> --}}
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Ejemplo de fila de cliente -->
-                            <tr>
-                                <td><img src="#" alt="Imagen Cliente" class="img-thumbnail" style="width: 50px; height: 50px;"></td>
-                                <td>Cliente 1</td>
-                                <td>Apellido 1</td>
-                                <td>30</td>
-                                <td>+123456789</td>
-                                <td>Descripción breve del cliente 1.</td>
-                                <td>
-                                    {{-- <a href="#" class="btn btn-info btn-sm">
-                                        <i class="fas fa-eye"></i> Detalles
-                                    </a> --}}
-                                    <a href="#" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <form action="#" method="POST" style="display:inline;" class="form-eliminar">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm btn-eliminar">
-                                            <i class="fas fa-trash-alt"></i> Eliminar
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <!-- Fin de ejemplo de fila -->
+                            @foreach($customers as $customer)
+                                <tr>
+                                    <td><img src="{{ asset('storage/' . $customer->profile_image) }}" alt="Imagen Cliente" class="img-thumbnail" style="width: 50px; height: 50px;"></td>
+                                    <td>{{ $customer->name }}</td>
+                                    <td>{{ $customer->surnames }}</td>
+                                    <td>{{ $customer->age }}</td>
+                                    <td>{{ $customer->phone_number }}</td>
+                                    {{-- <td>{{ $customer->description }}</td> --}}
+                                    <td>
+                                        {{-- Botones de acción --}}
+                                        <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </a>
+                                        <form action="{{ route('customer.destroy', $customer->id) }}" method="POST" style="display:inline;" class="form-eliminar">
+                                            @csrf 
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm btn-eliminar">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
+                        
                     </table>
                 </div>
             </div>

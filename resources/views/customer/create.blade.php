@@ -16,7 +16,9 @@
                     <h3 class="card-title">Crear Cliente</h3>
                 </div>
                 <div class="card-body">
-                    <form action="#" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('customer.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+
                         <!-- Imagen -->
                         <div class="form-group">
                             <label for="profile_image">Imagen de Perfil</label>
