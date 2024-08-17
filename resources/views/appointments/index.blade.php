@@ -21,153 +21,217 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para elegir la franja horaria -->
+    <div class="modal fade" id="timeSlotModal" tabindex="-1" role="dialog" aria-labelledby="timeSlotModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="timeSlotModalLabel">Seleccionar Hora para la Cita</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <input type="hidden" id="appointmentId">
+                        <div class="form-group">
+                            <label for="appointmentTitle">Título de la Cita</label>
+                            <input type="text" class="form-control" id="appointmentTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="startTime">Hora de Inicio</label>
+                            <select class="form-control" id="startTime" required>
+                                @for ($hour = 8; $hour <= 19; $hour++)
+                                    <option value="{{ $hour < 10 ? '0' . $hour : $hour }}:00">{{ $hour < 10 ? '0' . $hour : $hour }}:00</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="button" id="deleteButton" class="btn btn-danger" style="display: none;">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación de eliminación -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta cita?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" id="confirmDeleteButton" class="btn btn-danger">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
-            
-            // Obtener el id del usuario autenticado desde el backend
             var authenticatedUserId = {{ Auth::id() }};
-            
-            // Obtener los eventos ya reservados desde la base de datos
             var existingAppointments = @json($appointments);
+            var selectedDate = null;
+            var appointmentToDelete = null;
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                locale: 'es',  // Idioma en español
-                timeZone: 'Europe/Madrid',  // Zona horaria
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                timeZone: 'Europe/Madrid',
                 selectable: true,
-                editable: true, // Habilitar la edición de eventos (pero se controlará evento por evento)
-                slotLabelFormat: { // Formato de las horas
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false // Formato 24 horas
-                },
-                slotMinTime: '08:00:00',  // Comienzo de las horas visibles
-                slotMaxTime: '21:00:00',  // Fin de las horas visibles
-                slotDuration: '01:00:00', // Intervalos de 1 hora
+                editable: true,
                 events: existingAppointments.map(function(appointment) {
                     return {
-                        id: appointment.id,  // Necesario para identificar la cita
-                        title: appointment.user_id === authenticatedUserId ? appointment.title : 'Ocupado', // Mostrar "Ocupado" si no es del usuario autenticado
+                        id: appointment.id,
+                        title: appointment.user_id === authenticatedUserId ? appointment.title : 'Reservada',
                         start: appointment.start,
                         end: appointment.end,
-                        user_id: appointment.user_id, // Asegúrate de que el user_id está presente
-                        editable: appointment.user_id === authenticatedUserId // Solo editable si el usuario es el propietario
+                        user_id: appointment.user_id,
+                        editable: appointment.user_id === authenticatedUserId,
+                        color: appointment.user_id === authenticatedUserId ? '' : '#888888' // Color gris para citas de otros usuarios
                     };
                 }),
+                dateClick: function(info) {
+                    selectedDate = info.dateStr;
+                    console.log('Date clicked:', selectedDate);
+                    $('#timeSlotModal').modal('show');
+                    $('#appointmentId').val('');
+                    $('#appointmentTitle').val('');
+                    $('#deleteButton').hide();
+                },
                 eventClick: function(info) {
-                    // Verificar si el usuario autenticado es el creador de la cita
                     if (info.event.extendedProps.user_id !== authenticatedUserId) {
-                        // Mostrar una alerta o mensaje si no es el propietario de la cita
-                        Swal.fire('No puedes editar o eliminar citas que no te pertenecen.');
+                        Swal.fire('Esta cita está reservada por otro usuario.');
                         return;
                     }
 
-                    // Modal para editar o eliminar la cita (solo si es del usuario autenticado)
-                    Swal.fire({
-                        title: 'Editar Cita',
-                        text: "¿Qué quieres hacer con esta cita?",
-                        showCancelButton: true,
-                        confirmButtonText: 'Eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Eliminar la cita
-                            $.ajax({
-                                url: '/appointments/' + info.event.id,  // Ruta al controlador de eliminar
-                                method: 'DELETE',
-                                data: {
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                success: function(response) {
-                                    info.event.remove();  // Eliminar del calendario
-                                    Swal.fire('Eliminada!', 'Tu cita ha sido eliminada.', 'success');
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error('Error en la solicitud:', xhr.responseText);
-                                }
-                            });
-                        }
-                    });
-                },
-                select: function(info) {
-                    // Lógica de selección para crear citas
-                    Swal.fire({
-                        title: 'Reservar cita',
-                        input: 'text',
-                        inputLabel: 'Título de la cita',
-                        inputPlaceholder: 'Introduce el título de la cita',
-                        showCancelButton: true,
-                        confirmButtonText: 'Guardar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            var title = result.value;
-                            if (title) {
-                                $.ajax({
-                                    url: '/appointments',
-                                    method: 'POST',
-                                    data: {
-                                        title: title,
-                                        start: info.start.toISOString(),
-                                        end: info.end ? info.end.toISOString() : null,
-                                        _token: '{{ csrf_token() }}'
-                                    },
-                                    success: function(response) {
-                                        calendar.addEvent({
-                                            id: response.id, // Añadir el ID para la gestión
-                                            title: response.title,
-                                            start: response.start,
-                                            end: response.end,
-                                            allDay: info.allDay,
-                                            editable: true,  // Asegurarse de que el evento nuevo es editable
-                                            user_id: authenticatedUserId // Añadir user_id
-                                        });
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.error('Error en la solicitud:', xhr.responseText);
-                                    }
-                                });
-                            }
-                        }
-                    });
-                },
-                eventDrop: function(info) {
-                    // Solo permitir el arrastre y la edición si es del usuario autenticado
-                    if (info.event.extendedProps.user_id !== authenticatedUserId) {
-                        info.revert(); // Revertir el movimiento si no pertenece al usuario
-                        Swal.fire('No puedes mover citas que no te pertenecen.');
-                        return;
-                    }
-
-                    // Actualizar la cita en el backend cuando se mueva
-                    $.ajax({
-                        url: '/appointments/' + info.event.id,
-                        method: 'PUT',
-                        data: {
-                            start: info.event.start.toISOString(),
-                            end: info.event.end ? info.event.end.toISOString() : null,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire('Cita actualizada!', 'Tu cita ha sido actualizada.', 'success');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error en la solicitud:', xhr.responseText);
-                            info.revert(); // Revertir el cambio si ocurre un error
-                        }
-                    });
+                    selectedDate = info.event.start.toISOString().split('T')[0];
+                    $('#timeSlotModal').modal('show');
+                    $('#appointmentId').val(info.event.id);
+                    $('#appointmentTitle').val(info.event.title);
+                    var eventStart = new Date(info.event.start);
+                    $('#startTime').val(eventStart.toTimeString().substring(0, 5));
+                    $('#deleteButton').show();
+                    appointmentToDelete = info.event;
                 }
             });
 
             calendar.render();
+
+            // Guardar o actualizar la cita
+            $('#appointmentForm').on('submit', function(event) {
+                event.preventDefault();
+                var appointmentId = $('#appointmentId').val();
+                var title = $('#appointmentTitle').val();
+                var startTime = $('#startTime').val();
+
+                console.log('Selected Date:', selectedDate);
+
+                if (title && startTime && selectedDate) {
+                    var start = new Date(selectedDate + 'T' + startTime + ':00').toISOString();
+                    var endHour = parseInt(startTime.split(':')[0]) + 1;
+                    var end = new Date(selectedDate + 'T' + (endHour < 10 ? '0' + endHour : endHour) + ':00:00').toISOString();
+
+                    console.log('Sending appointment data:', { title, start, end });
+
+                    if (appointmentId) {
+                        // Actualizar la cita existente
+                        $.ajax({
+                            url: '/appointments/' + appointmentId,
+                            method: 'PUT',
+                            data: {
+                                title: title,
+                                start: start,
+                                end: end,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                var event = calendar.getEventById(appointmentId);
+                                event.setProp('title', title);
+                                event.setStart(start);
+                                event.setEnd(end);
+                                $('#timeSlotModal').modal('hide');
+                                Swal.fire('Éxito', 'Cita actualizada correctamente.', 'success');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error en la solicitud:', xhr.responseText);
+                                Swal.fire('Error', 'No se pudo actualizar la cita. Por favor, inténtalo de nuevo.', 'error');
+                            }
+                        });
+                    } else {
+                        // Crear una nueva cita
+                        $.ajax({
+                            url: '/appointments',
+                            method: 'POST',
+                            data: {
+                                title: title,
+                                start: start,
+                                end: end,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                calendar.addEvent({
+                                    id: response.id,
+                                    title: response.title,
+                                    start: response.start,
+                                    end: response.end,
+                                    allDay: false,
+                                    editable: true,
+                                    user_id: authenticatedUserId
+                                });
+                                $('#timeSlotModal').modal('hide');
+                                Swal.fire('Éxito', 'Cita creada correctamente.', 'success');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error en la solicitud:', xhr.responseText);
+                                Swal.fire('Error', 'No se pudo crear la cita. Por favor, inténtalo de nuevo.', 'error');
+                            }
+                        });
+                    }
+                } else {
+                    Swal.fire('Por favor completa todos los campos requeridos y asegúrate de seleccionar una fecha.');
+                }
+            });
+
+            // Eliminar la cita
+            $('#deleteButton').on('click', function(event) {
+                event.preventDefault();
+                $('#deleteConfirmationModal').modal('show');
+            });
+
+            $('#confirmDeleteButton').on('click', function() {
+                if (appointmentToDelete) {
+                    $.ajax({
+                        url: '/appointments/' + appointmentToDelete.id,
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            appointmentToDelete.remove();
+                            $('#deleteConfirmationModal').modal('hide');
+                            $('#timeSlotModal').modal('hide');
+                            Swal.fire('Éxito', 'Cita eliminada correctamente.', 'success');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error en la solicitud:', xhr.responseText);
+                            Swal.fire('Error', 'No se pudo eliminar la cita. Por favor, inténtalo de nuevo.', 'error');
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endpush
-
-
-
-
