@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\AppointmentController;
 
 
 
@@ -48,6 +49,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('/customer/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 });
+
+//EVENTS
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+});
+
 
 
 

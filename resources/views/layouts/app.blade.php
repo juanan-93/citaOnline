@@ -21,6 +21,8 @@
 
     <!-- Sweet Alert CSS -->
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.css') }}">
+    <!-- FullCalendar CSS -->
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fullcalendar/main.min.css') }}">
 
     @stack('styles')
 </head>
@@ -58,6 +60,10 @@
     
     <!-- Sweet Alert 2-->
     <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src="{{ asset('adminlte/plugins/fullcalendar/main.min.js') }}"></script>
+
 
     @stack('scripts')
 </body>

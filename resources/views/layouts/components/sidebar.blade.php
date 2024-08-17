@@ -48,8 +48,17 @@
                             <p>Crear paciente</p>
                         </a>
                     </li>
+
                 @endcan
-                
+                @can('customer')
+                    {{-- event --}}
+                    <li class="nav-item">
+                        <a href="{{ROUTE('appointments.index')}}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar"></i>
+                            <p>Pide tú cita</p>
+                        </a>
+                    </li>
+                @endcan
                 <!-- More sidebar items -->
             </ul>
         </nav>
